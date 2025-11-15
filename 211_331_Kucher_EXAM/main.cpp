@@ -17,7 +17,6 @@ QByteArray loadCorrectPinHash()
 
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        // Файла нет — используем дефолтный хеш
         return defaultHash;
     }
 
@@ -40,7 +39,7 @@ QByteArray loadCorrectPinHash()
         }
     }
 
-    return line.toUtf8();  // готовый hex-хеш
+    return line.toUtf8();
 }
 
 int main(int argc, char *argv[])
