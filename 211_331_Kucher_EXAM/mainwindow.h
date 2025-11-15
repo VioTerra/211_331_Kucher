@@ -35,4 +35,4 @@ private:
     void showData();
 };
 
-#endif // MAINWINDOW_H
+#endif
