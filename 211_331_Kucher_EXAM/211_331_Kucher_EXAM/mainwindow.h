@@ -29,7 +29,7 @@ public:
 private:
     Ui::MainWindow *ui;
     QList<TripRecord> m_records;
-    QString calculateRecordHash(const TripRecord &rec, const QString &prevHash) const;
+
     void loadData();
     void loadFromCsv(const QString &path);
     void showData();

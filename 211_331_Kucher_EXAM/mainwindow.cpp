@@ -5,6 +5,7 @@
 #include <QTextStream>
 #include <QCoreApplication>
 #include <QMessageBox>
+#include <QCryptographicHash>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -61,19 +62,83 @@ void MainWindow::loadFromCsv(const QString &path)
     }
 }
 
+QString MainWindow::calculateRecordHash(const TripRecord &rec, const QString &prevHash) const
+{
+    QString data = rec.cardNumber
+                   + "|" + rec.route
+                   + "|" + QString::number(rec.timestamp)
+                   + "|" + prevHash;
+
+    QByteArray md5 = QCryptographicHash::hash(data.toUtf8(),
+                                              QCryptographicHash::Md5);
+    return QString::fromLatin1(md5.toHex());
+}
+
 void MainWindow::showData()
 {
-    QString text;
-
-    for (const TripRecord &rec : m_records) {
-        text += tr("Карта: %1\n").arg(rec.cardNumber);
-        text += tr("Маршрут: %1\n").arg(rec.route);
-        text += tr("Время (time_t): %1\n").arg(rec.timestamp);
-        text += tr("Хеш (MD5): %1\n").arg(rec.hash);
-        text += "-------------------------\n";
+    if (m_records.isEmpty()) {
+        ui->textEditData->clear();
+        return;
     }
 
-    ui->textEditData->setPlainText(text);
+    QString html;
+
+    QString prevHash = "00000000000000000000000000000000";
+
+    int firstBadIndex = -1;
+
+    for (int i = 0; i < m_records.size(); ++i) {
+        const TripRecord &rec = m_records[i];
+
+        QString expected = calculateRecordHash(rec, prevHash);
+
+        bool ok = rec.hash.compare(expected, Qt::CaseInsensitive) == 0;
+
+        if (!ok && firstBadIndex == -1) {
+            firstBadIndex = i;
+        }
+
+        prevHash = rec.hash;
+    }
+
+
+    prevHash = "00000000000000000000000000000000";
+
+    for (int i = 0; i < m_records.size(); ++i) {
+        const TripRecord &rec = m_records[i];
+
+        bool markRed = (firstBadIndex != -1 && i >= firstBadIndex);
+
+        QString block;
+        block += "<b>Карта:</b> " + rec.cardNumber + "<br>";
+        block += "<b>Маршрут:</b> " + rec.route + "<br>";
+        block += "<b>Время (time_t):</b> " + QString::number(rec.timestamp) + "<br>";
+        block += "<b>Хеш (из файла):</b> " + rec.hash + "<br>";
+
+        QString expected = calculateRecordHash(rec, prevHash);
+        block += "<b>Ожидаемый хеш:</b> " + expected + "<br>";
+
+        bool ok = rec.hash.compare(expected, Qt::CaseInsensitive) == 0;
+        block += QString("<b>Статус:</b> %1<br>")
+                     .arg(ok ? "OK" : "ОШИБКА");
+
+        QString wrapped;
+        if (markRed) {
+            wrapped = "<div style=\"color:red; margin-bottom:8px;\">"
+                      + block +
+                      "</div><hr>";
+        } else {
+            wrapped = "<div style=\"margin-bottom:8px;\">"
+                      + block +
+                      "</div><hr>";
+        }
+
+        html += wrapped;
+
+        prevHash = rec.hash;
+    }
+
+    ui->textEditData->setHtml(html);
 }
 
 MainWindow::~MainWindow()
