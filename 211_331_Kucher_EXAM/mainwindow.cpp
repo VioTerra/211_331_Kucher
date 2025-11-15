@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget *parent)
 
 void MainWindow::loadData()
 {
-    // Путь к файлу рядом с исполняемым файлом (например, .../build/.../data.csv)
     const QString filePath = QCoreApplication::applicationDirPath() + "/data.csv";
 
     loadFromCsv(filePath);
@@ -30,9 +29,7 @@ void MainWindow::loadFromCsv(const QString &path)
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::warning(this,
-                             tr("Ошибка"),
-                             tr("Не удалось открыть файл: %1").arg(path));
+        QMessageBox::warning(this, tr("Ошибка"), tr("Не удалось открыть файл: %1").arg(path));
         return;
     }
 
@@ -45,7 +42,6 @@ void MainWindow::loadFromCsv(const QString &path)
 
         const QStringList parts = line.split(',');
         if (parts.size() != 4) {
-            // Строка некорректна — можно просто пропустить
             continue;
         }
 
@@ -56,7 +52,6 @@ void MainWindow::loadFromCsv(const QString &path)
         bool ok = false;
         rec.timestamp = parts[2].trimmed().toLongLong(&ok);
         if (!ok) {
-            // Некорректное число — пропускаем запись
             continue;
         }
 

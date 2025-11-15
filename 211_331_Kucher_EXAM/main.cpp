@@ -4,6 +4,44 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QCryptographicHash>
+#include <QFile>
+#include <QTextStream>
+#include <QCoreApplication>
+
+QByteArray loadCorrectPinHash()
+{
+    const QByteArray defaultHash("81dc9bdb52d04dc20036dbd8313ed055");
+
+    const QString filePath =
+        QCoreApplication::applicationDirPath() + "/pin.txt";
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // Файла нет — используем дефолтный хеш
+        return defaultHash;
+    }
+
+    QTextStream in(&file);
+
+    QString line = in.readLine().trimmed();
+    if (line.isEmpty()) {
+        return defaultHash;
+    }
+
+    line = line.toLower();
+
+    if (line.size() != 32) {
+        return defaultHash;
+    }
+    for (QChar ch : line) {
+        if (!(ch.isDigit() ||
+              (ch >= 'a' && ch <= 'f'))) {
+            return defaultHash;
+        }
+    }
+
+    return line.toUtf8();  // готовый hex-хеш
+}
 
 int main(int argc, char *argv[])
 {
@@ -19,9 +57,13 @@ int main(int argc, char *argv[])
         &ok
         );
 
-    QByteArray hash = QCryptographicHash::hash(pin.toUtf8(),QCryptographicHash::Md5).toHex();
+    if (!ok) {
+        return 0;
+    }
 
-    const QByteArray correctHash = QByteArray("81dc9bdb52d04dc20036dbd8313ed055");
+    QByteArray hash = QCryptographicHash::hash(pin.toUtf8(), QCryptographicHash::Md5).toHex();
+
+    QByteArray correctHash = loadCorrectPinHash();
 
     if (hash != correctHash) {
         QMessageBox::warning(nullptr, QObject::tr("Ошибка"), QObject::tr("PIN-код неверный!"));

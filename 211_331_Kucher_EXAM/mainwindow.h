@@ -11,10 +11,10 @@ QT_END_NAMESPACE
 
 struct TripRecord
 {
-    QString cardNumber;  // номер транспортной карты (16 цифр)
-    QString route;       // маршрут ("Москва-Зеленоград")
-    qint64 timestamp;    // время в формате time_t
-    QString hash;        // MD5 в hex
+    QString cardNumber;
+    QString route;
+    qint64 timestamp;
+    QString hash;
 };
 
 
@@ -28,11 +28,11 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QList<TripRecord> m_records;  // все загруженные записи
+    QList<TripRecord> m_records;
 
-    void loadData();                        // загрузка данных при старте
-    void loadFromCsv(const QString &path);  // чтение CSV-файла
-    void showData();                        // отображение данных в QTextEdit
+    void loadData();
+    void loadFromCsv(const QString &path);
+    void showData();
 };
 
 #endif // MAINWINDOW_H
