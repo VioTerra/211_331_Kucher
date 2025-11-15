@@ -9,6 +9,7 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
+/// Структура, описывающая одну запись о поездке в транспорте.
 struct TripRecord
 {
     QString cardNumber;
@@ -17,7 +18,7 @@ struct TripRecord
     QString hash;
 };
 
-
+/// Главное окно приложения, отображающее список поездок и выполняющее проверку целостности данных.
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -29,9 +30,13 @@ public:
 private:
     Ui::MainWindow *ui;
     QList<TripRecord> m_records;
+    /// Вычисляет ожидаемый хеш записи по формуле (1) на основе полей записи и хеша предыдущей.
     QString calculateRecordHash(const TripRecord &rec, const QString &prevHash) const;
+    /// Загружает данные из файла по умолчанию и обновляет интерфейс.
     void loadData();
+    /// Считывает записи из CSV-файла по указанному пути и заполняет список m_records.
     void loadFromCsv(const QString &path);
+    /// Отображает текущий список записей в QTextEdit и подсвечивает некорректные записи.
     void showData();
 };
 

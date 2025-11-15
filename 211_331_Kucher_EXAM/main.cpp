@@ -8,6 +8,8 @@
 #include <QTextStream>
 #include <QCoreApplication>
 
+/// Загружает "правильный" хеш PIN-кода из файла pin.txt или возвращает значение по умолчанию.
+/// Хеш ожидается в виде 32-символьной hex-строки (MD5) в первой строке файла.
 QByteArray loadCorrectPinHash()
 {
     const QByteArray defaultHash("81dc9bdb52d04dc20036dbd8313ed055");
@@ -42,6 +44,7 @@ QByteArray loadCorrectPinHash()
     return line.toUtf8();
 }
 
+/// Точка входа в приложение: выполняет проверку PIN-кода и при успешной аутентификации запускает главное окно.
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
